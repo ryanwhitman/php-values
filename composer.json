@@ -1,11 +1,11 @@
 {
-    "name": "ryanwhitman/values",
+    "name": "ryanwhitman/php-values",
     "description": "",
     "type": "project",
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "RyanWhitman\\Values\\": "src/"
+            "RyanWhitman\\PhpValues\\": "src/"
         }
     },
     "require": {

@@ -1,8 +1,8 @@
 <?php
 
-namespace RyanWhitman\Values\Exceptions;
+namespace RyanWhitman\PhpValues\Exceptions;
 
-use RyanWhitman\Values\Value;
+use RyanWhitman\PhpValues\Value;
 
 class InvalidValueException extends Exception
 {

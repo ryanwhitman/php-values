@@ -1,6 +1,6 @@
 <?php
 
-namespace RyanWhitman\Values\Exceptions;
+namespace RyanWhitman\PhpValues\Exceptions;
 
 use Exception as BaseException;
 

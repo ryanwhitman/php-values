@@ -1,6 +1,6 @@
 <?php
 
-namespace RyanWhitman\Values;
+namespace RyanWhitman\PhpValues;
 
 class Email extends Value
 {

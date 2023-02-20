@@ -1,9 +1,9 @@
 <?php
 
-namespace RyanWhitman\Values;
+namespace RyanWhitman\PhpValues;
 
-use RyanWhitman\Values\Exceptions\Exception;
-use RyanWhitman\Values\Exceptions\InvalidValueException;
+use RyanWhitman\PhpValues\Exceptions\Exception;
+use RyanWhitman\PhpValues\Exceptions\InvalidValueException;
 use TypeError;
 
 abstract class Value
