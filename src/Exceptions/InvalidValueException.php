@@ -9,7 +9,7 @@ class InvalidValueException extends Exception
     public function __construct(Value $valueObj, $value)
     {
         parent::__construct(
-            'An invalid value (' . get_class($valueObj).") was attempted: {$this->describeValue($value)}"
+            'An invalid value ('.get_class($valueObj).") was attempted: {$this->describeValue($value)}"
         );
     }
 

@@ -46,9 +46,19 @@ abstract class Value
         }
     }
 
+    public static function isValid($value): bool
+    {
+        return (bool) static::tryFrom($value);
+    }
+
     public static function from($value): self
     {
         return new static($value);
+    }
+
+    public static function getFrom($value)
+    {
+        return static::from($value)->get();
     }
 
     public static function tryFrom($value): ?self
@@ -58,6 +68,13 @@ abstract class Value
         } catch (InvalidValueException $e) {
             return null;
         }
+    }
+
+    public static function tryGetFrom($value)
+    {
+        $value = static::tryFrom($value);
+
+        return $value ? $value->get() : null;
     }
 
     public function getOrigValue()
