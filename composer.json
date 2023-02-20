@@ -1,0 +1,25 @@
+{
+    "name": "ryanwhitman/values",
+    "description": "",
+    "type": "project",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "RyanWhitman\\Values\\": "src/"
+        }
+    },
+    "require": {
+        "php": "^7.4 || ^8.0 || ^8.1"
+    },
+    "require-dev": {
+        "oyova/php-cs-fixer": "^1.2",
+        "symfony/var-dumper": "^5.4"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
