@@ -12,6 +12,8 @@ abstract class Value
 
     private $transformedValue;
 
+    protected array $baseValues = [];
+
     public function __construct($value)
     {
         // Is the value already an instance of the particular Value being
@@ -27,9 +29,10 @@ abstract class Value
             }
 
             try {
-                $transformedValue = $this->performTransformation($value);
+                $transformedValue = $this->applyBaseValues($value);
+                $transformedValue = $this->performTransformation($transformedValue);
                 $isValid = $this->performValidation($transformedValue);
-            } catch (TypeError $e) {
+            } catch (InvalidValueException|TypeError $e) {
                 $isValid = false;
             }
 
@@ -71,6 +74,27 @@ abstract class Value
         $value = static::tryFrom($value);
 
         return $value ? $value->get() : null;
+    }
+
+    private function applyBaseValues($value)
+    {
+        foreach ($this->baseValues as $baseValueClass) {
+            if (! is_subclass_of($baseValueClass, self::class)) {
+                throw new Exception(
+                    "The base value '{$baseValueClass}' is not a subclass of '".self::class."'"
+                );
+            }
+
+            if ($baseValueClass === static::class) {
+                throw new Exception(
+                    "The value '{$baseValueClass}' contains itself as a base value."
+                );
+            }
+
+            $value = $baseValueClass::getFrom($value);
+        }
+
+        return $value;
     }
 
     private function performTransformation($value)
