@@ -15,24 +15,12 @@ abstract class Value
     public function __construct($value)
     {
         if ($value instanceof static) {
-            $this->origValue = $value->getOrigValue();
-            $this->transformedValue = $value->get();
+            $transformedValue = $value->get();
+            $value = $value->getOrigValue();
         } else {
             try {
-                $transformedValue = method_exists($this, 'transform') ?
-                    $this->transform($value) :
-                    $value;
-
-                if (! method_exists($this, 'validate')) {
-                    throw new Exception('A validate method must be defined.');
-                }
-
-                $isValid = $this->validate($transformedValue);
-                if (! is_bool($isValid)) {
-                    throw new Exception(
-                        'The validate method must return a boolean.'
-                    );
-                }
+                $transformedValue = $this->performTransformation($value);
+                $isValid = $this->performValidation($transformedValue);
             } catch (TypeError $e) {
                 $isValid = false;
             }
@@ -40,10 +28,10 @@ abstract class Value
             if (! $isValid) {
                 throw new InvalidValueException($this, $value);
             }
-
-            $this->origValue = $value;
-            $this->transformedValue = $transformedValue;
         }
+
+        $this->origValue = $value;
+        $this->transformedValue = $transformedValue;
     }
 
     public static function isValid($value): bool
@@ -75,6 +63,29 @@ abstract class Value
         $value = static::tryFrom($value);
 
         return $value ? $value->get() : null;
+    }
+
+    private function performTransformation($value)
+    {
+        return method_exists($this, 'transform') ?
+            $this->transform($value) :
+            $value;
+    }
+
+    private function performValidation($value): bool
+    {
+        if (! method_exists($this, 'validate')) {
+            throw new Exception('A validate method must be defined.');
+        }
+
+        $isValid = $this->validate($value);
+        if (! is_bool($isValid)) {
+            throw new Exception(
+                'The validate method must return a boolean.'
+            );
+        }
+
+        return $isValid;
     }
 
     public function getOrigValue()
