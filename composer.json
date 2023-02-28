@@ -1,12 +1,21 @@
 {
     "name": "ryanwhitman/php-values",
-    "description": "",
-    "type": "project",
+    "description": "PHP Values",
     "license": "MIT",
-    "autoload": {
-        "psr-4": {
-            "RyanWhitman\\PhpValues\\": "src/"
+    "keywords": [
+        "value objects"
+    ],
+    "authors": [
+        {
+            "name": "Ryan Whitman",
+            "homepage": "https://github.com/RyanWhitman"
         }
+    ],
+    "homepage": "https://github.com/RyanWhitman/php-values",
+    "support": {
+        "issues": "https://github.com/RyanWhitman/php-values/issues",
+        "source": "https://github.com/RyanWhitman/php-values",
+        "docs": "https://github.com/RyanWhitman/php-values/blob/main/README.md"
     },
     "require": {
         "php": "^7.4 || ^8.0 || ^8.1"
@@ -17,6 +26,16 @@
         "pestphp/pest": "^1.22",
         "symfony/var-dumper": "^5.4"
     },
+    "autoload": {
+        "psr-4": {
+            "RyanWhitman\\PhpValues\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "RyanWhitman\\PhpValues\\Tests\\": "tests"
+        }
+    },
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
@@ -24,6 +43,9 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true
         }
+    },
+    "scripts": {
+        "test": "vendor/bin/pest"
     },
     "minimum-stability": "dev",
     "prefer-stable": true
