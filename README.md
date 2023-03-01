@@ -2,37 +2,39 @@
 
 [![Latest Version on Packagist][ico-version]][link-packagist] [![PHP from Packagist][ico-php-versions]][link-packagist] [![Software License][ico-license]](LICENSE) [![Total Downloads][ico-downloads]][link-packagist]
 
-PHP Values is a tool for creating immutable value objects in PHP. A value object intakes any raw value of your choosing, transforms it, validates it, and is ready for use across your application. For instance, suppose you need an email address when creating a user. While you can write a method like this:
+PHP Values is a tool for creating immutable value objects in PHP. A value object intakes a raw value, transforms it, validates it, and can be used consistently and dependably across your application.
+
+For instance, suppose you need an email address when creating a user. You can write it more traditionally like this:
 
 ```php
-public function saveUser(string $email)
+public function createUser(string $email)
 {
     // perform sanitation and validation on email before using
 }
 ```
 
-It's more optimal to write it like this:
+But it's more optimal to write it like this:
 
 ```php
 use RyanWhitman\PhpValues\Email;
 
-public function saveUser(Email $email)
+public function createUser(Email $email)
 {
-    // email has been sanitized and validated and is ready for use
+    // email has already been sanitized and validated and is ready for use
 }
 ```
 
 ## Install
 
-You can install the package via composer:
+You should install the package via composer:
 
 ```bash
 composer require ryanwhitman/php-values
 ```
 
-## Usage
+## Example
 
-Start by creating a value class. For instance, a value class for an email address:
+Start by creating a Value class. For instance, a Value class for an email address:
 
 ```php
 <?php
@@ -82,7 +84,52 @@ Email::tryFrom('non-email'); // null
 Email::isValid('non-email'); // false
 ```
 
-## API
+## Usage
+
+To create a new Value class, extend the `RyanWhitman\PhpValues\Value` class. From there, define a `transform` method (optional) and a `validate` method (mandatory). Upon instantiation, the `transform` method receives the raw input and transforms it, as needed. Then, the `validate` method receives the transformed value and returns `true` or `false`. If validation passes, the object is ready for use. If validation passes, `InvalidValueException` is thrown. Note: 2 `try` static methods exist that catch the exception and return `null`.
+
+#### transform(mixed $value): mixed
+
+The `transform` method is an optional method called during instantiation. It receives the input value and, when defined, should return a sanitized/transformed version of the value. The transform method is not defined in the base abstract Value class to allow for proper typing in sub-classes.
+
+```php
+protected function transform(string $email): string
+{
+    return filter_var($email, FILTER_SANITIZE_EMAIL);
+}
+```
+
+#### validate(mixed $value): bool
+The `validate` method is called during instantiation. It receives the transformed value and should return true or false. The validate method is not defined in the base abstract Value class to allow for proper typing in sub-classes.
+
+```php
+protected function validate(string $email): bool
+{
+    return filter_var($email, FILTER_VALIDATE_EMAIL);
+}
+```
+
+### Base Values
+
+Suppose you're creating a Value class for a person's name. You'll likely want to remove all superfluous whitespace. You could, of course, simply call another Value class within your `transform` method, but you can also define a `$baseValues` property to automatically run other Value classes:
+
+```php
+<?php
+
+namespace App\Values;
+
+use RyanWhitman\PhpValues\SquishedString;
+use RyanWhitman\PhpValues\Value;
+
+class Name extends Value
+{
+    protected array $baseValues = [
+        SquishedString::class,
+    ];
+
+    // ...
+}
+```
 
 ### Static Methods
 
@@ -92,7 +139,7 @@ The `from` static method will return a Value instance when validation passes and
 
 ```php
 Email::from('email@example.com'); // instance of Email
-Email::from('non-email'); // throws RyanWhitman\PhpValues\Exceptions\InvalidValueException
+Email::from('non-email'); // throws InvalidValueException
 ```
 
 #### getFrom(mixed $value): mixed
@@ -101,7 +148,7 @@ The `getFrom` static method is a shortcut for `::from($value)->get()`.
 
 ```php
 Email::getFrom('email@example.com'); // email@example.com
-Email::getFrom('non-email'); // throws RyanWhitman\PhpValues\Exceptions\InvalidValueException
+Email::getFrom('non-email'); // throws InvalidValueException
 ```
 
 #### tryFrom(mixed $value): ?Value
@@ -133,30 +180,9 @@ Email::isValid('non-email'); // false
 
 ### Instance Methods
 
-#### transform(mixed $value): mixed
-
-The `transform` method is an optional method called during instantiation. It receives the input value and, when defined, should return a sanitized/transformed version of the value. The transform method is not defined in the base abstract Value class to allow for proper typing in sub-classes.
-
-```php
-protected function transform(string $email): string
-{
-    return filter_var($email, FILTER_SANITIZE_EMAIL);
-}
-```
-
-#### validate(mixed $value): bool
-The `validate` method is called during instantiation. It receives the transformed value and should return true or false. The validate method is not defined in the base abstract Value class to allow for proper typing in sub-classes.
-
-```php
-protected function validate(string $email): bool
-{
-    return filter_var($email, FILTER_VALIDATE_EMAIL);
-}
-```
-
 #### getOrigValue(): mixed
 
-The `getOrigValue` method returns the original input value (prior to transformation).
+The `getOrigValue` method returns the original input value (before transformation).
 
 ```php
 Email::from('e m ail@example.com')->getOrigValue(); // e m ail@example.com
@@ -169,6 +195,24 @@ The `get` method returns the transformed and validated value.
 ```php
 Email::from('e m ail@example.com')->get(); // email@example.com
 ```
+
+### Traits
+
+#### RyanWhitman\PhpValues\Concerns\Stringable
+
+The `Stringable` trait simply defines the `__toString()` magic method with `(string) $this->get()`.
+
+### Exceptions
+
+PHP Values will throw 1 of 2 exceptions:
+
+`RyanWhitman\PhpValues\Exceptions\InvalidValueException` will be thrown when either a `TypeError` occurs (e.g. an array is needed but a string is provided) or when validation fails. This exception is useful as it indicates the raw input is invalid. `RyanWhitman\PhpValues\Exceptions\Exception` is thrown when something else goes wrong (e.g. a `validate` method is not defined). Note: The `try` methods only catch `InvalidValueException`.
+
+## Pre-Built Values
+
+- [Email](https://github.com/RyanWhitman/php-values/blob/main/src/Email.php)
+- [SquishedString](https://github.com/RyanWhitman/php-values/blob/main/src/SquishedString.php)
+- [TrimmedString](https://github.com/RyanWhitman/php-values/blob/main/src/TrimmedString.php)
 
 ## Testing
 
