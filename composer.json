@@ -19,7 +19,7 @@
     },
     "require": {
         "php": ">=7.4,<8.2",
-        "doctrine/annotations": "^2.0"
+        "doctrine/annotations": "^1|^2"
     },
     "require-dev": {
         "filp/whoops": "^2.14",

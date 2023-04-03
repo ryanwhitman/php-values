@@ -230,7 +230,7 @@ After adding the `ShortcutMethod` annotation/attribute to the `getFormatted` met
 
 ```php
 ::getFormattedFrom($value)
-::tryGetFormattedFrom($value
+::tryGetFormattedFrom($value)
 ```
 
 ### Traits
