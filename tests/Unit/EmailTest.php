@@ -9,7 +9,7 @@ testWithValidInput(Email::class, [
 ]);
 
 testWithInvalidInput(Email::class, [
-    new stdclass(),
+    new stdClass(),
     1,
     'non-email',
     'test@example.com@',

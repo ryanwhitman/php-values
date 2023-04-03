@@ -196,6 +196,43 @@ The `get` method returns the transformed and validated value.
 Email::from('e m ail@example.com')->get(); // email@example.com
 ```
 
+### Shortcut Methods
+
+As mentioned above, the `getFrom` and `tryGetFrom` static methods are shortcuts for `::from($value)->get()` and `::tryFrom($value)->get()`, respectively. You may add the `ShortcutMethod` annotation/attribute to your custom get methods to add the same shortcut capabilities. Shortcut methods must be defined using camelCase and start with `get` (e.g. `getFormatted`).
+
+Using a [doctrine annotation](https://www.doctrine-project.org/projects/doctrine-annotations/en/2.0/index.html) in PHP 7.4+:
+
+```php
+use RyanWhitman\PhpValues\Annotations\ShortcutMethod;
+
+/**
+ * @ShortcutMethod
+ */
+public function getFormatted()
+{
+    // ...
+}
+```
+
+Using an [attribute](https://www.php.net/manual/en/language.attributes.overview.php) in PHP 8.0+:
+
+```php
+use RyanWhitman\PhpValues\Attributes\ShortcutMethod;
+
+#[ShortcutMethod]
+public function getFormatted()
+{
+    // ...
+}
+```
+
+After adding the `ShortcutMethod` annotation/attribute to the `getFormatted` method, for example, the following will work:
+
+```php
+::getFormattedFrom($value)
+::tryGetFormattedFrom($value
+```
+
 ### Traits
 
 #### RyanWhitman\PhpValues\Concerns\Stringable

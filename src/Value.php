@@ -2,6 +2,11 @@
 
 namespace RyanWhitman\PhpValues;
 
+use Doctrine\Common\Annotations\AnnotationReader;
+use Error;
+use ReflectionMethod;
+use RyanWhitman\PhpValues\Annotations\ShortcutMethod as ShortcutMethodAnnotation;
+use RyanWhitman\PhpValues\Attributes\ShortcutMethod as ShortcutMethodAttribute;
 use RyanWhitman\PhpValues\Exceptions\Exception;
 use RyanWhitman\PhpValues\Exceptions\InvalidValueException;
 use TypeError;
@@ -76,6 +81,79 @@ abstract class Value
         return $value ? $value->get() : null;
     }
 
+    private static function canUseAttributes(): bool
+    {
+        return PHP_VERSION_ID >= 80000;
+    }
+
+    private static function parseMethodNameGetMiddle(
+        string $methodName,
+        string $startsWith,
+        string $endsWith
+    ): ?string {
+        $matches = [];
+        preg_match(
+            "/(^{$startsWith})([A-Z][a-zA-Z\d]*)({$endsWith}$)/",
+            $methodName,
+            $matches
+        );
+
+        return $matches[2] ?? null;
+    }
+
+    private static function methodExists(string $methodName): bool
+    {
+        return method_exists(static::class, $methodName);
+    }
+
+    private static function isShortcutMethod(string $methodName): bool
+    {
+        static::throwIfMethodUndefined($methodName);
+
+        return
+            static::methodHasAnnotation($methodName, ShortcutMethodAnnotation::class) ||
+            static::methodHasAttribute($methodName, ShortcutMethodAttribute::class);
+    }
+
+    private static function methodHasAnnotation(
+        string $methodName,
+        string $annotationClass
+    ): bool {
+        static::throwIfMethodUndefined($methodName);
+
+        return
+            (bool) (new AnnotationReader())->getMethodAnnotation(
+                new ReflectionMethod(static::class, $methodName),
+                $annotationClass
+            );
+    }
+
+    private static function methodHasAttribute(
+        string $methodName,
+        string $attributeClass
+    ): bool {
+        static::throwIfMethodUndefined($methodName);
+
+        return
+            static::canUseAttributes() &&
+            (new ReflectionMethod(static::class, $methodName))
+                ->getAttributes($attributeClass);
+    }
+
+    private static function throwIfMethodUndefined(string $methodName): void
+    {
+        if (! static::methodExists($methodName)) {
+            static::throwMethodUndefinedError($methodName);
+        }
+    }
+
+    private static function throwMethodUndefinedError(string $methodName): void
+    {
+        throw new Error(
+            'Call to undefined method '.static::class."::{$methodName}()"
+        );
+    }
+
     private function applyBaseValues($value)
     {
         foreach ($this->baseValues as $baseValueClass) {
@@ -128,5 +206,50 @@ abstract class Value
     public function get()
     {
         return $this->transformedValue;
+    }
+
+    public static function __callStatic(string $methodName, array $args)
+    {
+        $value = $args[0];
+
+        // get*From
+        $parsedMethodName = static::parseMethodNameGetMiddle(
+            $methodName,
+            'get',
+            'From'
+        );
+        if (! is_null($parsedMethodName)) {
+            $realMethodName = "get{$parsedMethodName}";
+            if (
+                static::methodExists($realMethodName) &&
+                static::isShortcutMethod($realMethodName)
+            ) {
+                return static::from($value)->{$realMethodName}();
+            }
+
+            static::throwMethodUndefinedError($methodName);
+        }
+
+        // tryGet*From
+        $parsedMethodName = static::parseMethodNameGetMiddle(
+            $methodName,
+            'tryGet',
+            'From'
+        );
+        if (! is_null($parsedMethodName)) {
+            $realMethodName = "get{$parsedMethodName}";
+            if (
+                static::methodExists($realMethodName) &&
+                static::isShortcutMethod($realMethodName)
+            ) {
+                $value = static::tryFrom($value);
+
+                return $value ? $value->{$realMethodName}() : null;
+            }
+
+            static::throwMethodUndefinedError($methodName);
+        }
+
+        static::throwMethodUndefinedError($methodName);
     }
 }

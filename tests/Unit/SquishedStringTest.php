@@ -8,7 +8,7 @@ testWithValidInput(SquishedString::class, [
 ]);
 
 testWithInvalidInput(SquishedString::class, [
-    new stdclass(),
+    new stdClass(),
     [],
 ]);
 

@@ -8,7 +8,7 @@ testWithValidInput(TrimmedString::class, [
 ]);
 
 testWithInvalidInput(TrimmedString::class, [
-    new stdclass(),
+    new stdClass(),
     [],
 ]);
 
