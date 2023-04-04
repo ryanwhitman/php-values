@@ -60,11 +60,6 @@ abstract class Value
         return new static($value);
     }
 
-    public static function getFrom($value)
-    {
-        return static::from($value)->get();
-    }
-
     public static function tryFrom($value): ?self
     {
         try {
@@ -72,13 +67,6 @@ abstract class Value
         } catch (InvalidValueException $e) {
             return null;
         }
-    }
-
-    public static function tryGetFrom($value)
-    {
-        $value = static::tryFrom($value);
-
-        return $value ? $value->get() : null;
     }
 
     private static function canUseAttributes(): bool
@@ -93,7 +81,7 @@ abstract class Value
     ): ?string {
         $matches = [];
         preg_match(
-            "/(^{$startsWith})([A-Z][a-zA-Z\d]*)({$endsWith}$)/",
+            "/(^{$startsWith})([A-Z][a-zA-Z\d]*)*({$endsWith}$)/",
             $methodName,
             $matches
         );
@@ -203,6 +191,9 @@ abstract class Value
         return $this->origValue;
     }
 
+    /**
+     * @ShortcutMethodAnnotation
+     */
     public function get()
     {
         return $this->transformedValue;
